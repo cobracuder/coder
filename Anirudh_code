@@ -1,0 +1,131 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+struct matrix{
+    int row,col;
+    int **mat;
+};
+
+// Insert random data in matrix m
+void generate_data(int **&m,int row, int col)
+{
+    srand(time(0));                  // Help rand to take distinct values
+    for(int i=0; i<row; i++)
+    {
+        for(int j=0; j<col; j++)
+        {
+            m[i][j] = rand()%200 -100;   // Inserting element of range [-100, 99]
+        }
+    }
+}
+
+// Function display matrix
+void display(int **m, int row, int col)
+{
+    for(int i=0; i<row; i++)
+    {
+        for(int j=0; j<col; j++)
+        {
+           cout<<m[i][j]<<" ";
+        }
+        cout<<"\n";
+    }
+}
+
+// Return pointer of pointer for matrix having data of matrix m excluding 0th row and col_ind column 
+int**left_mat(int **m, int row, int col, int col_ind)
+{
+  int new_col = col-1;
+  int new_row = row-1;
+  int **mat = new int*[new_row];
+  for(int i=0; i< new_row; i++)
+  {
+      mat[i] = new int[col];
+  }
+  
+  for(int i=1;i<row;i++)    // skipped 0th row of matrix m
+  {
+      for(int j=0,k=0;j<col;j++,k++)
+      {
+          if(col_ind==j)   // Skip the col_ind column values of matrix m
+          {
+              k--;     // if j matches with col_ind to revert the increment done by for loop at the end 
+              continue;
+          }
+          mat[i-1][k] = m[i][j];
+      }
+  }
+  return mat;
+}
+
+// Calculating determinant using recursive function 
+int64_t determinant(int **m, int row, int col)
+{
+    if(row!=col)
+    {
+        cout<<"\nDeterminant cannot be calculated:";
+        return -1;
+    }
+    if(row==2&&col==2)
+    {
+        return m[0][0]*m[1][1] - m[0][1]*m[1][0];         // if we get 2X2 matrix we simply calulate determinant and return it;
+    }
+    int64_t ans = 0;
+    for(int i=0 ; i< col; i++)                           // Calculating determinant through 1st row
+    {
+        if(i%2==0)
+        ans+=m[0][i]*(determinant(left_mat(m,row,col,i), row-1, col-1)); // left_mat return a pointer of pointer 
+                                                                         // after excluding 0th row and i th col of m matrix
+        else
+        ans-=m[0][i]*(determinant(left_mat(m,row,col,i), row-1, col-1));
+    }
+    return ans;
+}
+
+void transpose(int **m, int row, int col)
+{
+    int **arr = new int*[col];   
+    
+    for(int i=0; i< col; i++)
+    {
+      arr[i] = new int[row];
+    }
+    
+    for(int i=0;i<row;i++)
+    {
+        for(int j=0;j<col;j++)
+        {
+           arr[j][i] = m[i][j];  // transpose logic
+        }
+    }
+    
+    display(arr, col, row);
+}
+
+int main()
+{
+    matrix *M1 = new matrix();
+    
+    cout<<"\nEnter Row and Col ";
+    cin>>M1->row>>M1->col;
+    
+    (M1->mat) = new int*[M1->row];         
+    for(int i=0; i<M1->row; i++)
+    {
+        M1->mat[i] = new int[M1->col];
+    }
+    
+    generate_data(M1->mat, M1->row, M1->col);
+    
+    cout<<"\nMatrix:\n";
+    display(M1->mat, M1->row, M1->col);
+    
+    cout<<"\ndeterminant:";
+    cout<<determinant(M1->mat, M1->row, M1->col);
+    
+    cout<<"\nTranspose:\n";
+    transpose(M1->mat, M1->row, M1->col);
+    
+    delete M1;
+    return 0;
+}
